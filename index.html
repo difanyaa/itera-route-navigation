@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BFS Navigasi Kampus ITERA</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* =========================
+           CONTAINER
+        ========================= */
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            margin-bottom: 10px;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #172554;
+        }
+
+        /* =========================
+           RESULT
+        ========================= */
+
+        #result {
+            display: none;
+        }
+
+        .route {
+            background: #eff6ff;
+            border-left: 5px solid #1e3a8a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .route-item {
+            display: inline-block;
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 14px;
+            margin: 5px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .arrow {
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        .distance {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th,
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        /* =========================
+           GRAPH
+        ========================= */
+
+        .graph-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        #graph {
+            position: relative;
+            min-width: 900px;
+            height: 650px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .node.start {
+            background: #16a34a;
+        }
+
+        .node.goal {
+            background: #dc2626;
+        }
+
+        .node.path {
+            background: #f59e0b;
+        }
+
+        .edge {
+            position: absolute;
+            height: 2px;
+            background: #94a3b8;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .edge.path-edge {
+            background: #f59e0b;
+            height: 4px;
+        }
+
+        /* =========================
+           INFO
+        ========================= */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-box h3 {
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin-top: 50px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 768px) {
+
+            header h1 {
+                font-size: 30px;
+            }
+
+            header p {
+                font-size: 15px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header>
+        <h1>BFS Navigasi Kampus ITERA</h1>
+
+        <p>
+            Pencarian Jalur Antar Lokasi ITERA
+            Menggunakan Algoritma Breadth-First Search
+        </p>
+    </header>
+
+
+    <div class="container">
+
+        <!-- =========================
+             TENTANG PROYEK
+        ========================= -->
+
+        <div class="card">
+
+            <h2>Tentang Proyek</h2>
+
+            <p>
+                Proyek ini merupakan implementasi algoritma
+                <strong>Breadth-First Search (BFS)</strong>
+                untuk mencari jalur antar lokasi di lingkungan
+                Institut Teknologi Sumatera (ITERA).
+            </p>
+
+            <p>
+                Setiap lokasi kampus direpresentasikan sebagai
+                node, sedangkan hubungan antar lokasi direpresentasikan
+                sebagai edge yang memiliki informasi jarak.
+            </p>
+
+            <p>
+                BFS melakukan pencarian secara bertahap berdasarkan
+                level dari lokasi awal hingga menemukan lokasi tujuan.
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             PILIH LOKASI
+        ========================= -->
+
+        <div class="card">
+
+            <h2>Pencarian Jalur</h2>
+
+            <div class="form-group">
+
+                <label for="start">
+                    Lokasi Awal
+                </label>
+
+                <select id="start">
+                    <option value="Labtek 3">Labtek 3</option>
+                    <option value="Labtek 1">Labtek 1</option>
+                    <option value="Gedung A">Gedung A</option>
+                    <option value="Gedung C/D">Gedung C/D</option>
+                    <option value="Gerbang Utama">Gerbang Utama</option>
+                    <option value="Gedung B">Gedung B</option>
+                    <option value="Masjid At-Tanwir">Masjid At-Tanwir</option>
+                    <option value="GKU 1">GKU 1</option>
+                    <option value="Perempatan">Perempatan</option>
+                    <option value="Asrama">Asrama</option>
+                    <option value="Labtek 2">Labtek 2</option>
+                    <option value="GKU 2">GKU 2</option>
+                    <option value="Gedung E">Gedung E</option>
+                    <option value="Rima">Rima</option>
+                    <option value="Labtek OZT">Labtek OZT</option>
+                    <option value="BDR GKU 2">BDR GKU 2</option>
+                    <option value="BDR GKU 1">BDR GKU 1</option>
+                    <option value="Gerbang Barat">Gerbang Barat</option>
+                    <option value="Gedung F">Gedung F</option>
+                    <option value="Labtek 4">Labtek 4</option>
+                    <option value="GSG">GSG</option>
+                    <option value="BDR F">BDR F</option>
+                    <option value="Kebun Raya">Kebun Raya</option>
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="goal">
+                    Lokasi Tujuan
+                </label>
+
+                <select id="goal">
+
+                    <option value="Asrama">Asrama</option>
+                    <option value="Labtek 3">Labtek 3</option>
+                    <option value="Labtek 1">Labtek 1</option>
+                    <option value="Gedung A">Gedung A</option>
+                    <option value="Gedung C/D">Gedung C/D</option>
+                    <option value="Gerbang Utama">Gerbang Utama</option>
+                    <option value="Gedung B">Gedung B</option>
+                    <option value="Masjid At-Tanwir">Masjid At-Tanwir</option>
+                    <option value="GKU 1">GKU 1</option>
+                    <option value="Perempatan">Perempatan</option>
+                    <option value="Labtek 2">Labtek 2</option>
+                    <option value="GKU 2">GKU 2</option>
+                    <option value="Gedung E">Gedung E</option>
+                    <option value="Rima">Rima</option>
+                    <option value="Labtek OZT">Labtek OZT</option>
+                    <option value="BDR GKU 2">BDR GKU 2</option>
+                    <option value="BDR GKU 1">BDR GKU 1</option>
+                    <option value="Gerbang Barat">Gerbang Barat</option>
+                    <option value="Gedung F">Gedung F</option>
+                    <option value="Labtek 4">Labtek 4</option>
+                    <option value="GSG">GSG</option>
+                    <option value="BDR F">BDR F</option>
+                    <option value="Kebun Raya">Kebun Raya</option>
+
+                </select>
+
+            </div>
+
+
+            <button onclick="runBFS()">
+                🔍 Cari Jalur dengan BFS
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             HASIL
+        ========================= -->
+
+        <div class="card" id="result">
+
+            <h2>Hasil Pencarian</h2>
+
+            <div class="route">
+
+                <h3>Jalur yang Ditemukan</h3>
+
+                <div id="route"></div>
+
+            </div>
+
+
+            <div class="distance">
+
+                Total Jarak:
+                <span id="distance">0</span> meter
+
+            </div>
+
+
+            <div class="info-grid">
+
+                <div class="info-box">
+
+                    <h3 id="nodeCount">
+                        0
+                    </h3>
+
+                    <p>
+                        Jumlah Lokasi
+                    </p>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <h3 id="stepCount">
+                        0
+                    </h3>
+
+                    <p>
+                        Langkah BFS
+                    </p>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <h3 id="visitedCount">
+                        0
+                    </h3>
+
+                    <p>
+                        Node Dikunjungi
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             LANGKAH BFS
+        ========================= -->
+
+        <div class="card" id="stepsCard" style="display:none;">
+
+            <h2>Proses Breadth-First Search</h2>
+
+            <p>
+                Tabel berikut menunjukkan proses BFS
+                dari lokasi awal sampai lokasi tujuan ditemukan.
+            </p>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Langkah
+                            </th>
+
+                            <th>
+                                Node Saat Ini
+                            </th>
+
+                            <th>
+                                Tetangga Ditambahkan
+                            </th>
+
+                            <th>
+                                Queue
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="stepsTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             VISUALISASI GRAPH
+        ========================= -->
+
+        <div class="card">
+
+            <h2>Visualisasi Graph ITERA</h2>
+
+            <p>
+                Graph berikut menggambarkan hubungan antar lokasi
+                yang digunakan dalam proses pencarian BFS.
+            </p>
+
+            <div class="graph-container">
+
+                <div id="graph">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <p>
+            Pencarian Jarak Antar Lokasi ITERA
+            menggunakan Algoritma BFS
+        </p>
+
+        <p>
+            Data Science Project
+        </p>
+
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        /* ==================================
+           DATA GRAPH
+        ================================== */
+
+        const EDGES = [
+
+            ["Labtek 3", "Labtek 1", 150],
+
+            ["Labtek 1", "GKU 1", 110],
+
+            ["GKU 1", "Labtek 2", 190],
+
+            ["Labtek 2", "Labtek OZT", 110],
+
+            ["Labtek OZT", "BDR GKU 1", 220],
+
+            ["Gerbang Barat", "BDR GKU 1", 260],
+
+            ["BDR GKU 1", "Kebun Raya", 850],
+
+            ["BDR GKU 1", "BDR F", 100],
+
+            ["BDR F", "Gedung F", 400],
+
+            ["Gedung F", "BDR GKU 2", 100],
+
+            ["Gedung A", "Gerbang Utama", 120],
+
+            ["Gedung A", "Gedung C/D", 120],
+
+            ["Gedung C/D", "Labtek 1", 450],
+
+            ["Gedung A", "Perempatan", 50],
+
+            ["Gerbang Utama", "Gedung B", 120],
+
+            ["Gedung B", "Perempatan", 50],
+
+            ["Perempatan", "GKU 2", 240],
+
+            ["GKU 2", "BDR GKU 2", 40],
+
+            ["Perempatan", "Gedung E", 210],
+
+            ["Gedung E", "BDR GKU 2", 180],
+
+            ["BDR GKU 2", "Labtek 4", 40],
+
+            ["Labtek 4", "GSG", 400],
+
+            ["GSG", "Rima", 1000],
+
+            ["Rima", "Asrama", 350],
+
+            ["Asrama", "Masjid At-Tanwir", 250],
+
+            ["Perempatan", "Asrama", 320
+
+        ]];
+
+
+        /* ==================================
+           POSISI NODE
+        ================================== */
+
+        const NODE_POS = {
+
+            "Labtek 3": [5, 10],
+
+            "Labtek 1": [15, 10],
+
+            "Gedung A": [30, 10],
+
+            "Gedung C/D": [30, 20],
+
+            "Gerbang Utama": [40, 5],
+
+            "Gedung B": [50, 10],
+
+            "Masjid At-Tanwir": [85, 5],
+
+            "GKU 1": [15, 30],
+
+            "Perempatan": [40, 30],
+
+            "Asrama": [70, 30],
+
+            "Labtek 2": [15, 45],
+
+            "GKU 2": [32, 45],
+
+            "Gedung E": [55, 45],
+
+            "Rima": [85, 45],
+
+            "Labtek OZT": [15, 60],
+
+            "BDR GKU 2": [45, 60],
+
+            "BDR GKU 1": [25, 70],
+
+            "Gerbang Barat": [5, 75],
+
+            "Gedung F": [40, 75],
+
+            "Labtek 4": [65, 75],
+
+            "GSG": [80, 60],
+
+            "BDR F": [30, 90],
+
+            "Kebun Raya": [15, 95]
+
+        };
+
+
+        /* ==================================
+           MEMBANGUN GRAPH
+        ================================== */
+
+        function buildGraph() {
+
+            const graph = {};
+
+            EDGES.forEach(edge => {
+
+                const [a, b, distance] = edge;
+
+                if (!graph[a]) {
+                    graph[a] = [];
+                }
+
+                if (!graph[b]) {
+                    graph[b] = [];
+                }
+
+                graph[a].push([b, distance]);
+
+                graph[b].push([a, distance]);
+
+            });
+
+            return graph;
+        }
+
+
+        /* ==================================
+           BFS
+        ================================== */
+
+        function bfs(graph, start, goal) {
+
+            const queue = [start];
+
+            const visited = new Set();
+
+            const parent = {};
+
+            const visitedOrder = [];
+
+            const steps = [];
+
+            visited.add(start);
+
+            parent[start] = null;
+
+
+            while (queue.length > 0) {
+
+                const current = queue.shift();
+
+                visitedOrder.push(current);
+
+                const neighborsAdded = [];
+
+
+                const neighbors = graph[current] || [];
+
+
+                neighbors.forEach(([neighbor, distance]) => {
+
+                    if (!visited.has(neighbor)) {
+
+                        visited.add(neighbor);
+
+                        parent[neighbor] = current;
+
+                        queue.push(neighbor);
+
+                        neighborsAdded.push(neighbor);
+
+                    }
+
+                });
+
+
+                steps.push({
+
+                    current: current,
+
+                    neighbors: neighborsAdded,
+
+                    queue: [...queue],
+
+                    isGoal: current === goal
+
+                });
+
+
+                if (current === goal) {
+
+                    break;
+
+                }
+
+            }
+
+
+            if (!visited.has(goal)) {
+
+                return {
+
+                    path: null,
+
+                    visitedOrder,
+
+                    steps
+
+                };
+
+            }
+
+
+            const path = [];
+
+            let node = goal;
+
+
+            while (node !== null) {
+
+                path.push(node);
+
+                node = parent[node];
+
+            }
+
+
+            path.reverse();
+
+
+            return {
+
+                path,
+
+                visitedOrder,
+
+                steps
+
+            };
+
+        }
+
+
+        /* ==================================
+           MENCARI JARAK EDGE
+        ================================== */
+
+        function getDistance(a, b) {
+
+            for (const edge of EDGES) {
+
+                if (
+                    (edge[0] === a && edge[1] === b) ||
+                    (edge[0] === b && edge[1] === a)
+                ) {
+
+                    return edge[2];
+
+                }
+
+            }
+
+            return 0;
+
+        }
+
+
+        /* ==================================
+           TOTAL JARAK
+        ================================== */
+
+        function calculateDistance(path) {
+
+            let total = 0;
+
+
+            for (let i = 0; i < path.length - 1; i++) {
+
+                total += getDistance(
+                    path[i],
+                    path[i + 1]
+                );
+
+            }
+
+
+            return total;
+
+        }
+
+
+        /* ==================================
+           MENJALANKAN BFS
+        ================================== */
+
+        function runBFS() {
+
+            const start =
+                document.getElementById("start").value;
+
+            const goal =
+                document.getElementById("goal").value;
+
+
+            if (start === goal) {
+
+                alert(
+                    "Lokasi awal dan tujuan tidak boleh sama."
+                );
+
+                return;
+
+            }
+
+
+            const graph = buildGraph();
+
+            const result =
+                bfs(graph, start, goal);
+
+
+            if (!result.path) {
+
+                alert(
+                    "Tidak ditemukan jalur dari lokasi awal ke tujuan."
+                );
+
+                return;
+
+            }
+
+
+            const path = result.path;
+
+            const distance =
+                calculateDistance(path);
+
+
+            /* =========================
+               MENAMPILKAN HASIL
+            ========================= */
+
+            document
+                .getElementById("result")
+                .style.display = "block";
+
+
+            const routeContainer =
+                document.getElementById("route");
+
+
+            routeContainer.innerHTML = "";
+
+
+            path.forEach((node, index) => {
+
+                const span =
+                    document.createElement("span");
+
+                span.className = "route-item";
+
+                span.textContent = node;
+
+                routeContainer.appendChild(span);
+
+
+                if (index < path.length - 1) {
+
+                    const arrow =
+                        document.createElement("span");
+
+                    arrow.className = "arrow";
+
+                    arrow.textContent = " → ";
+
+                    routeContainer.appendChild(arrow);
+
+                }
+
+            });
+
+
+            document
+                .getElementById("distance")
+                .textContent = distance;
+
+
+            document
+                .getElementById("nodeCount")
+                .textContent = path.length;
+
+
+            document
+                .getElementById("stepCount")
+                .textContent =
+                result.steps.length;
+
+
+            document
+                .getElementById("visitedCount")
+                .textContent =
+                result.visitedOrder.length;
+
+
+            /* =========================
+               TABEL LANGKAH BFS
+            ========================= */
+
+            const stepsCard =
+                document.getElementById("stepsCard");
+
+            stepsCard.style.display = "block";
+
+
+            const table =
+                document.getElementById("stepsTable");
+
+            table.innerHTML = "";
+
+
+            result.steps.forEach((step, index) => {
+
+                const row =
+                    document.createElement("tr");
+
+
+                const status =
+                    step.isGoal
+                        ? "🎯 Tujuan ditemukan"
+                        : "Diproses";
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${index + 1}
+                    </td>
+
+                    <td>
+                        ${step.current}
+                    </td>
+
+                    <td>
+                        ${step.neighbors.length > 0
+                            ? step.neighbors.join(", ")
+                            : "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${step.queue.length > 0
+                            ? step.queue.join(" → ")
+                            : "-"
+                        }
+                    </td>
+
+                    <td>
+                        ${status}
+                    </td>
+
+                `;
+
+
+                table.appendChild(row);
+
+            });
+
+
+            /* =========================
+               VISUALISASI GRAPH
+            ========================= */
+
+            drawGraph(
+                start,
+                goal,
+                path
+            );
+
+        }
+
+
+        /* ==================================
+           VISUALISASI GRAPH
+        ================================== */
+
+        function drawGraph(
+            start,
+            goal,
+            path
+        ) {
+
+            const graphContainer =
+                document.getElementById("graph");
+
+
+            graphContainer.innerHTML = "";
+
+
+            /* =========================
+               EDGE
+            ========================= */
+
+            EDGES.forEach(edge => {
+
+                const a = edge[0];
+
+                const b = edge[1];
+
+
+                const posA =
+                    NODE_POS[a];
+
+                const posB =
+                    NODE_POS[b];
+
+
+                if (!posA || !posB) {
+                    return;
+                }
+
+
+                const x1 =
+                    (posA[0] / 100) *
+                    graphContainer.clientWidth;
+
+
+                const y1 =
+                    (posA[1] / 100) *
+                    graphContainer.clientHeight;
+
+
+                const x2 =
+                    (posB[0] / 100) *
+                    graphContainer.clientWidth;
+
+
+                const y2 =
+                    (posB[1] / 100) *
+                    graphContainer.clientHeight;
+
+
+                const dx = x2 - x1;
+
+                const dy = y2 - y1;
+
+                const length =
+                    Math.sqrt(
+                        dx * dx +
+                        dy * dy
+                    );
+
+
+                const angle =
+                    Math.atan2(dy, dx) *
+                    180 / Math.PI;
+
+
+                const edgeElement =
+                    document.createElement("div");
+
+
+                edgeElement.className =
+                    "edge";
+
+
+                if (
+                    path.includes(a) &&
+                    path.includes(b) &&
+                    Math.abs(
+                        path.indexOf(a) -
+                        path.indexOf(b)
+                    ) === 1
+                ) {
+
+                    edgeElement.classList.add(
+                        "path-edge"
+                    );
+
+                }
+
+
+                edgeElement.style.left =
+                    x1 + "px";
+
+
+                edgeElement.style.top =
+                    y1 + "px";
+
+
+                edgeElement.style.width =
+                    length + "px";
+
+
+                edgeElement.style.transform =
+                    `rotate(${angle}deg)`;
+
+
+                graphContainer.appendChild(
+                    edgeElement
+                );
+
+            });
+
+
+            /* =========================
+               NODE
+            ========================= */
+
+            Object.keys(NODE_POS).forEach(node => {
+
+                const pos =
+                    NODE_POS[node];
+
+
+                const nodeElement =
+                    document.createElement("div");
+
+
+                nodeElement.className =
+                    "node";
+
+
+                if (node === start) {
+
+                    nodeElement.classList.add(
+                        "start"
+                    );
+
+                }
+
+
+                if (node === goal) {
+
+                    nodeElement.classList.add(
+                        "goal"
+                    );
+
+                }
+
+
+                if (
+                    path.includes(node) &&
+                    node !== start &&
+                    node !== goal
+                ) {
+
+                    nodeElement.classList.add(
+                        "path"
+                    );
+
+                }
+
+
+                nodeElement.textContent =
+                    node;
+
+
+                nodeElement.style.left =
+                    pos[0] + "%";
+
+
+                nodeElement.style.top =
+                    pos[1] + "%";
+
+
+                graphContainer.appendChild(
+                    nodeElement
+                );
+
+            });
+
+        }
+
+
+        /* ==================================
+           GRAPH AWAL
+        ================================== */
+
+        window.addEventListener(
+            "load",
+            function() {
+
+                const graph =
+                    buildGraph();
+
+                drawGraph(
+                    null,
+                    null,
+                    []
+                );
+
+            }
+        );
+
+
+        /* ==================================
+           RESPONSIVE GRAPH
+        ================================== */
+
+        window.addEventListener(
+            "resize",
+            function() {
+
+                drawGraph(
+                    null,
+                    null,
+                    []
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
