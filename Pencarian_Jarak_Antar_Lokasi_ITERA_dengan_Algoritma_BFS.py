@@ -10,6 +10,8 @@ from colorama import init, Fore, Back, Style
 
 init(autoreset=True)
 
+
+
 # DATA: GRAF ITERA
     
 EDGES = [
@@ -607,6 +609,831 @@ def get_node_input(prompt_text, nodes_sorted, label):
         else:
             print(C["error"] + f"    '{raw}' tidak ditemukan. Coba lagi.")
 
+
+#  EKSPOR HALAMAN WEB (index.html)
+
+HTML_TEMPLATE = r'''<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BFS Navigasi Kampus ITERA</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #071936;
+            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0b1f45, #102d61);
+            padding: 50px 20px;
+            text-align: center;
+            border-bottom: 1px solid #284d83;
+        }
+
+        header h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: #b8c7df;
+            font-size: 16px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        .card {
+            background: #0d2349;
+            border: 1px solid #244878;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 18px;
+            color: #ffffff;
+        }
+
+        .description {
+            color: #c8d4e8;
+            line-height: 1.7;
+        }
+
+        .algorithm {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .algorithm div {
+            background: #102b58;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #2b5389;
+        }
+
+        .algorithm strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd740;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd8eb;
+        }
+
+        select {
+            width: 100%;
+            padding: 13px;
+            border-radius: 8px;
+            border: 1px solid #40679c;
+            background: #071936;
+            color: white;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2196f3;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result-box {
+            background: #071936;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .route {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .node {
+            background: #ffd740;
+            color: #071936;
+            padding: 9px 13px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            color: #ffd740;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #102b58;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat span {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00e676;
+            margin-top: 8px;
+        }
+
+        .steps {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #294d7e;
+            text-align: left;
+        }
+
+        th {
+            color: #ffd740;
+            background: #102b58;
+        }
+
+        .visited {
+            color: #64b5f6;
+        }
+
+        .goal {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #8fa6c5;
+            border-top: 1px solid #244878;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 700px) {
+            .algorithm,
+            .form-group,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🧭 BFS Navigasi Kampus ITERA</h1>
+    <p>Pencarian Jalur Antar Lokasi ITERA Menggunakan Algoritma Breadth-First Search</p>
+</header>
+
+
+<div class="container">
+
+    <!-- ABOUT -->
+    <section class="card">
+        <h2>📌 Tentang Proyek</h2>
+
+        <p class="description">
+            Proyek ini mengimplementasikan algoritma
+            <strong>Breadth-First Search (BFS)</strong>
+            untuk mencari jalur antar lokasi di lingkungan Kampus ITERA.
+            Setiap lokasi direpresentasikan sebagai node pada graph,
+            sedangkan hubungan antar lokasi direpresentasikan sebagai edge
+            dengan bobot jarak dalam meter.
+        </p>
+
+        <div class="algorithm">
+
+            <div>
+                <strong>Algoritma</strong>
+                Breadth-First Search
+            </div>
+
+            <div>
+                <strong>Struktur Data</strong>
+                Graph & Queue
+            </div>
+
+            <div>
+                <strong>Bahasa</strong>
+                Python & JavaScript
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- INPUT -->
+    <section class="card">
+
+        <h2>🔎 Cari Rute</h2>
+
+        <div class="form-group">
+
+            <div>
+                <label for="start">Titik Awal</label>
+
+                <select id="start">
+                    <option value="">-- Pilih lokasi --</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="goal">Titik Tujuan</label>
+
+                <select id="goal">
+                    <option value="">-- Pilih lokasi --</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button onclick="runBFS()">
+            🚀 Jalankan BFS
+        </button>
+
+    </section>
+
+
+    <!-- RESULT -->
+    <section class="card result" id="result">
+
+        <h2>📍 Hasil Pencarian</h2>
+
+        <div class="result-box">
+
+            <p>
+                <strong>Titik Awal:</strong>
+                <span id="resultStart"></span>
+            </p>
+
+            <p style="margin-top: 8px;">
+                <strong>Titik Tujuan:</strong>
+                <span id="resultGoal"></span>
+            </p>
+
+            <h3 style="margin-top: 20px;">
+                Jalur BFS
+            </h3>
+
+            <div class="route" id="route"></div>
+
+        </div>
+
+
+        <div class="stats">
+
+            <div class="stat">
+                Jumlah Node
+                <span id="nodeCount">0</span>
+            </div>
+
+            <div class="stat">
+                Jumlah Hop
+                <span id="hopCount">0</span>
+            </div>
+
+            <div class="stat">
+                Total Jarak
+                <span id="distance">0 m</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BFS STEPS -->
+    <section class="card result" id="stepsCard">
+
+        <h2>📊 Langkah-Langkah BFS</h2>
+
+        <div class="steps">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>Node Diproses</th>
+                        <th>Tetangga Ditemukan</th>
+                        <th>Queue</th>
+                    </tr>
+                </thead>
+
+                <tbody id="stepsBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- INFORMATION -->
+    <section class="card">
+
+        <h2>💡 Cara Kerja</h2>
+
+        <p class="description">
+
+            1. Pengguna memilih lokasi awal dan lokasi tujuan.
+
+            <br><br>
+
+            2. Sistem membentuk graph berdasarkan hubungan antar lokasi ITERA.
+
+            <br><br>
+
+            3. Algoritma BFS melakukan pencarian menggunakan struktur data
+            <i>queue</i>.
+
+            <br><br>
+
+            4. Node yang telah dikunjungi dicatat dan setiap node menyimpan
+            parent untuk membentuk kembali jalur.
+
+            <br><br>
+
+            5. Setelah tujuan ditemukan, sistem menampilkan jalur BFS,
+            jumlah hop, dan total jarak berdasarkan bobot edge.
+
+        </p>
+
+    </section>
+
+</div>
+
+
+<footer>
+
+    <p>
+        Pencarian Jarak Antar Lokasi ITERA
+        dengan Algoritma BFS
+    </p>
+
+    <p style="margin-top: 8px;">
+        Data Science Project
+    </p>
+
+</footer>
+
+
+<script>
+
+/* =====================================================
+   DATA GRAF ITERA
+===================================================== */
+
+__EDGES_JS_PLACEHOLDER__
+
+
+/* =====================================================
+   BUILD GRAPH
+===================================================== */
+
+function buildGraph(edges) {
+
+    const graph = {};
+
+    edges.forEach(([u, v, w]) => {
+
+        if (!graph[u])
+            graph[u] = [];
+
+        if (!graph[v])
+            graph[v] = [];
+
+        graph[u].push({
+            node: v,
+            weight: w
+        });
+
+        graph[v].push({
+            node: u,
+            weight: w
+        });
+
+    });
+
+    return graph;
+}
+
+
+const graph = buildGraph(EDGES);
+
+const nodes = Object.keys(graph).sort();
+
+
+/* =====================================================
+   MASUKKAN LOKASI KE SELECT
+===================================================== */
+
+const startSelect = document.getElementById("start");
+const goalSelect = document.getElementById("goal");
+
+
+nodes.forEach(node => {
+
+    const option1 = document.createElement("option");
+    option1.value = node;
+    option1.textContent = node;
+
+    const option2 = document.createElement("option");
+    option2.value = node;
+    option2.textContent = node;
+
+    startSelect.appendChild(option1);
+    goalSelect.appendChild(option2);
+
+});
+
+
+/* =====================================================
+   BFS
+===================================================== */
+
+function bfs(start, goal) {
+
+    const queue = [start];
+
+    const visited = new Set();
+
+    const parent = {};
+
+    const steps = [];
+
+    visited.add(start);
+
+    parent[start] = null;
+
+
+    while (queue.length > 0) {
+
+        const current = queue.shift();
+
+        const neighborsAdded = [];
+
+
+        graph[current].forEach(edge => {
+
+            const neighbor = edge.node;
+
+            if (!visited.has(neighbor)) {
+
+                visited.add(neighbor);
+
+                parent[neighbor] = current;
+
+                queue.push(neighbor);
+
+                neighborsAdded.push(neighbor);
+
+            }
+
+        });
+
+
+        steps.push({
+
+            current: current,
+
+            neighbors: neighborsAdded,
+
+            queue: [...queue],
+
+            goal: current === goal
+
+        });
+
+
+        if (current === goal)
+            break;
+
+    }
+
+
+    if (!visited.has(goal)) {
+
+        return null;
+
+    }
+
+
+    /* Rekonstruksi jalur */
+
+    const path = [];
+
+    let current = goal;
+
+
+    while (current !== null) {
+
+        path.push(current);
+
+        current = parent[current];
+
+    }
+
+
+    path.reverse();
+
+
+    return {
+        path: path,
+        steps: steps,
+        visited: [...visited],
+        parent: parent
+    };
+
+}
+
+
+/* =====================================================
+   HITUNG JARAK
+===================================================== */
+
+function calculateDistance(path) {
+
+    let total = 0;
+
+
+    for (let i = 0; i < path.length - 1; i++) {
+
+        const current = path[i];
+
+        const next = path[i + 1];
+
+
+        const edge = graph[current].find(
+            item => item.node === next
+        );
+
+
+        if (edge) {
+
+            total += edge.weight;
+
+        }
+
+    }
+
+
+    return total;
+
+}
+
+
+/* =====================================================
+   JALANKAN BFS
+===================================================== */
+
+function runBFS() {
+
+    const start = startSelect.value;
+    const goal = goalSelect.value;
+
+
+    if (!start || !goal) {
+
+        alert("Silakan pilih titik awal dan titik tujuan.");
+
+        return;
+
+    }
+
+
+    if (start === goal) {
+
+        alert("Titik awal dan tujuan tidak boleh sama.");
+
+        return;
+
+    }
+
+
+    const result = bfs(start, goal);
+
+
+    if (!result) {
+
+        alert("Tidak ditemukan jalur.");
+
+        return;
+
+    }
+
+
+    const path = result.path;
+
+    const distance = calculateDistance(path);
+
+
+    /* Tampilkan result */
+
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("stepsCard").style.display = "block";
+
+
+    document.getElementById("resultStart").textContent = start;
+
+    document.getElementById("resultGoal").textContent = goal;
+
+
+    /* Route */
+
+    const routeContainer = document.getElementById("route");
+
+    routeContainer.innerHTML = "";
+
+
+    path.forEach((node, index) => {
+
+        const nodeElement = document.createElement("span");
+
+        nodeElement.className = "node";
+
+        nodeElement.textContent = node;
+
+        routeContainer.appendChild(nodeElement);
+
+
+        if (index < path.length - 1) {
+
+            const arrow = document.createElement("span");
+
+            arrow.className = "arrow";
+
+            arrow.textContent = "→";
+
+            routeContainer.appendChild(arrow);
+
+        }
+
+    });
+
+
+    /* Statistik */
+
+    document.getElementById("nodeCount").textContent =
+        path.length;
+
+    document.getElementById("hopCount").textContent =
+        path.length - 1;
+
+    document.getElementById("distance").textContent =
+        distance.toLocaleString("id-ID") + " m";
+
+
+    /* =================================================
+       TABEL LANGKAH BFS
+    ================================================= */
+
+    const tableBody = document.getElementById("stepsBody");
+
+    tableBody.innerHTML = "";
+
+
+    result.steps.forEach((step, index) => {
+
+        const row = document.createElement("tr");
+
+
+        const neighbors =
+            step.neighbors.length > 0
+            ? step.neighbors.join(", ")
+            : "-";
+
+
+        const queue =
+            step.queue.length > 0
+            ? step.queue.join(" → ")
+            : "Kosong";
+
+
+        row.innerHTML = `
+
+            <td>${index + 1}</td>
+
+            <td class="${step.goal ? "goal" : "visited"}">
+                ${step.current}
+            </td>
+
+            <td>${neighbors}</td>
+
+            <td>${queue}</td>
+
+        `;
+
+
+        tableBody.appendChild(row);
+
+    });
+
+
+    /* Scroll ke hasil */
+
+    document.getElementById("result")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+
+}
+
+</script>
+
+</body>
+</html>'''
+
+
+def _edges_to_js(edges):
+    """Ubah daftar EDGES Python menjadi literal array JavaScript."""
+    lines = ["const EDGES = ["]
+    for u, v, w in edges:
+        u_js = u.replace("\\", "\\\\").replace('"', '\\"')
+        v_js = v.replace("\\", "\\\\").replace('"', '\\"')
+        lines.append(f'    ["{u_js}", "{v_js}", {w}],')
+    lines.append("];")
+    return "\n".join(lines)
+
+
+def generate_index_html(edges, out_path="index.html"):
+    """
+    Buat file index.html (versi web interaktif dari BFS Navigasi ITERA)
+    menggunakan data EDGES yang sama persis dengan versi terminal,
+    sehingga kedua versi selalu konsisten.
+    """
+    js_edges = _edges_to_js(edges)
+    html_content = HTML_TEMPLATE.replace("__EDGES_JS_PLACEHOLDER__", js_edges)
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    return out_path
+
+
 #  MAIN
 
 def main():
@@ -615,6 +1442,12 @@ def main():
 
     graph       = build_graph(EDGES)
     nodes_sorted = sorted(graph.keys())
+
+    # Ekspor versi web (index.html) agar program menghasilkan output tambahan
+    # berupa halaman HTML interaktif, selain output terminal & PNG.
+    html_path = generate_index_html(EDGES)
+    print(C["success"] + f"  Versi web berhasil dibuat: " + C["path"] + html_path)
+    print(C["muted"]   + "  Buka file tersebut di browser untuk mencoba versi interaktifnya.\n")
 
     while True:
         # Tampilkan daftar node
